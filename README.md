@@ -2,16 +2,55 @@
 - 전반적으로 휼륭한 책입니다.
 
 # 1.  프로그램과 C 언어
-> 1-1. 프로그래밍 기초\
-> 1-2. C언어소개\
-> 1-3. 전자계산기 원리와 프로그래밍 개념\
-> 1-4. C언어 서술 형식\
-> 1-5. C프로그램 실행 파일
+## 1-1. 프로그래밍 기초
+## 1-2. C언어소개
+## 1-3. 전자계산기 원리와 프로그래밍 개념
+## 1-4. C언어 서술 형식
+  ■ 주석문
+
+   ```c
+   /* 주석문은 /* 여러줄에 결쳐서도 */ 사용할 수 있습니다. */
+   ```
+  *Block주석은 사용하지 말 것*이며 Line 주석을 사용하야 한다.  
+  - 위와 같은 문제가 발생하기도 하며,  
+  - 찾기을 할 때도 Line 단위로 List Up 된다.
+  - 여러줄 주석처리도 Editor의 Line Comment / UnComment 기능을 익혀서 반드시 Line Comment한다.
+    <https://github.com/zhangsob/Editor.html> 에서 Editor.html을 Down받아 Hot-Key을 익힌다.
+
+  - 여러줄 주석처리하려면 확실하게.. 주석 시작 / 주석 끝을 표시한다.
+  ```c
+  /********************
+  volatile int i = 0 ;
+  for(i = 0; i < 1000; ++i)
+      ; // Null Statement
+  *********************/
+  ```
+  - 아래와 같이 전처리기로 ON (#if 1) / OFF(#if 0) 처리하는 것이 TEST하는 것이 더 편리함.
+  ```c
+  #if 0     // 의미 없는 것이라서 OFF처리함. 2024-01-01 전산과 부사수가
+  volatile int i = 0 ;
+  for(i = 0; i < 1000; ++i)
+      ; // Null Statement
+  #endif    // 의미 없는 부분이라서 주석처리함.
+  ```
+  - 부사수가 위와 같이 OFF하니, 원작인 사수가 다시 아래와 같이 Coding함.
+  ```c
+  #if 1     // [2024-08-04] 전자과 사수白(아뢰다 백) 본 소스는 FirmWare 소스로 ON하고,
+  volatile int i = 0 ;  // volatile은 compile에게 최적화할 때.
+                        // 의미없다고 무시하지 말고, 그대로 수행하라고 하는 KeyWord
+  for(i = 0; i < 1000; ++i)
+      ; // Null Statement
+  #else // OFF하면 Compile시 오류발생하도록 안전장치
+  #   error "FirmWare에서 Sleep을 주는 방법임.(위 부분 주석처리 금지)"
+  #endif
+  ```
+
+## 1-5. C프로그램 실행 파일
 
 # 2.  C언어로 만드는 첫 번째 프로그램
-> 2-1. C언어 개발 환경 구축하기\
-> 2-2. 비주얼 스튜디오 프로젝트 만들기\
-> 2-3. 내가 만든 첫 번째 프로그램  
+## 2-1. C언어 개발 환경 구축하기
+## 2-2. 비주얼 스튜디오 프로젝트 만들기
+## 2-3. 내가 만든 첫 번째 프로그램
 
 # 3. 자료형
 ## 3-1. 컴퓨터의 자료 기억 방식
@@ -67,9 +106,12 @@
   | 10L           | const long        |
   | 10LL          | const long long   |
 
-  - <https://en.cppreference.com/w/c/language/integer_constant>
+  - <https://en.cppreference.com/w/c/language/integer_constant>\
+    여기서, C99 : 1999년에 확정된 Spec, C23 : 2023년에 확정된 Spec
   - <https://en.cppreference.com/w/c/language/character_constant>
   - <https://en.cppreference.com/w/c/language/string_literal>
+  - <https://en.cppreference.com/w/c> 에서..C언어 Version을 확인할 수 있다.\
+    ![C언어의 Spec](./image/c_spec.png)
 
 ## 4-2. 데이터 저장 공간, 변수
 ## 4-3. 2진수를 16진수로 변환하는 방법
