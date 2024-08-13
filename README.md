@@ -275,7 +275,43 @@
 ## 7-2. 연산자 우선순위와 연산 방향
 - 우선순위 모호하면 무조건 ( ) 한다.
 - 특히, bit 연산자 와 ? : 는 무조건 ( ) 하는 것이 좋다. [경험상]
+- ! 연산자대신 != 또는 == 연산자를 사용하는 것이 좋다.\
+  ```c
+  if (!strcmp(bankcode, "81"))      strcpy(bankname,"하나은행") ;
+  ```
+  - is not (bankcode가 81와 차이)
+  - *!* 가 눈에 들어 오지 않는다. (Miss할 가능성이 높다.)
+  ```c
+  if (strcmp(bankcode, "81") == 0)  strcpy(bankname,"하나은행") ;
+  ```
+  - 우리말의 어순과 같다. [ bankcode가 81와 차이가 0이다. ]
+  - *== 0* 가 확실히 눈에 들어 온다.
 
+- 구간(x1부터 x2까지, x1과 x2 사이에)을 뜻할 때.
+  
+  ```c
+  if (x >= 20 && x <= 40) return 1 ; 
+  ```
+  - *변수를 앞쪽에 비교값을 뒤쪽* 습관대로 한다.
+  - x가 20보다 크고, x가 40보다 작은면
+
+  ```c
+  if (20 <= x && x <= 40) return 1 ;
+  ```
+  - 20 .... x .... 40 라는 느낌으로
+  - 작은 것은 왼쪽에 큰 것은 오른쪽에.. 그래서 부등호는 < 또는 <= 으로 하는 것 바람직.. *수학의 X좌표*
+  - 위와 같이 쓰고, *"x가 20 ~ 40 사이에 있으면"* 라고 읽는다.
+  - kotlin 의 in연산자와 range, SQL의 BETWEEN 과 같은 느낌
+    ```kotlin
+    if(20 <= x && x <= 40)  return 1 ;  // kotlin에서도 아래과 같이 읽어도 된다.(전환하기도 좋다.)
+    when(x) {
+      in 20..40 -> return -1 ;
+    }
+    ```
+    ```sql
+    WHERE 20 <= X AND X <= 40 -- SQL에서도 아래와 같이 읽어도 된다.(전환하기도 좋다.)
+    WHERE X BETWEEN 20 AND 40
+    ```
 # 8. 조건문 (p:151)
 ## 8-1. 제어문
 ## 8-2. if 조건문
@@ -853,6 +889,71 @@ for (i = 0; i < length; ++i)
   sizeof(t4.u):  1, &t4.u: 00CFFD9C, &t4.u - &t4:12
   sizeof(t4.s):  2, &t4.s: 00CFFD9E, &t4.s - &t4:14
   ```
+
+  *VS2010 x86(Win32)*
+  ```
+  sizeof(struct Test0): 24
+  sizeof(t0  ): 24, &t0  : 00EFF778, &t0   - &t0:0
+  sizeof(t0.c):  1, &t0.c: 00EFF778, &t0.c - &t0:0
+  sizeof(t0.d):  8, &t0.d: 00EFF780, &t0.d - &t0:8
+  sizeof(t0.u):  1, &t0.u: 00EFF788, &t0.u - &t0:16
+  sizeof(t0.s):  2, &t0.s: 00EFF78A, &t0.s - &t0:18
+  sizeof(struct Test1): 12
+  sizeof(t1  ): 12, &t1  : 00EFF764, &t1   - &t1:0
+  sizeof(t1.c):  1, &t1.c: 00EFF764, &t1.c - &t1:0
+  sizeof(t1.d):  8, &t1.d: 00EFF765, &t1.d - &t1:1
+  sizeof(t1.u):  1, &t1.u: 00EFF76D, &t1.u - &t1:9
+  sizeof(t1.s):  2, &t1.s: 00EFF76E, &t1.s - &t1:10
+  sizeof(struct Test2): 14
+  sizeof(t2  ): 14, &t2  : 00EFF74C, &t2   - &t2:0
+  sizeof(t2.c):  1, &t2.c: 00EFF74C, &t2.c - &t2:0
+  sizeof(t2.d):  8, &t2.d: 00EFF74E, &t2.d - &t2:2
+  sizeof(t2.u):  1, &t2.u: 00EFF756, &t2.u - &t2:10
+  sizeof(t2.s):  2, &t2.s: 00EFF758, &t2.s - &t2:12
+  sizeof(struct Test4): 16
+  sizeof(t4  ): 16, &t4  : 00EFF734, &t4   - &t4:0
+  sizeof(t4.c):  1, &t4.c: 00EFF734, &t4.c - &t4:0
+  sizeof(t4.d):  8, &t4.d: 00EFF738, &t4.d - &t4:4
+  sizeof(t4.u):  1, &t4.u: 00EFF740, &t4.u - &t4:12
+  sizeof(t4.s):  2, &t4.s: 00EFF742, &t4.s - &t4:14
+  ```
+
+  *VS6.0 x86(Win32)*
+  ```
+  sizeof(struct Test0): 24
+  sizeof(t0  ): 24, &t0  : 0019FF1C, &t0   - &t0:0
+  sizeof(t0.c):  1, &t0.c: 0019FF1C, &t0.c - &t0:0
+  sizeof(t0.d):  8, &t0.d: 0019FF24, &t0.d - &t0:8
+  sizeof(t0.u):  1, &t0.u: 0019FF2C, &t0.u - &t0:16
+  sizeof(t0.s):  2, &t0.s: 0019FF2E, &t0.s - &t0:18
+  sizeof(struct Test1): 12
+  sizeof(t1  ): 12, &t1  : 0019FF10, &t1   - &t1:0
+  sizeof(t1.c):  1, &t1.c: 0019FF10, &t1.c - &t1:0
+  sizeof(t1.d):  8, &t1.d: 0019FF11, &t1.d - &t1:1
+  sizeof(t1.u):  1, &t1.u: 0019FF19, &t1.u - &t1:9
+  sizeof(t1.s):  2, &t1.s: 0019FF1A, &t1.s - &t1:10
+  sizeof(struct Test2): 14
+  sizeof(t2  ): 14, &t2  : 0019FF00, &t2   - &t2:0
+  sizeof(t2.c):  1, &t2.c: 0019FF00, &t2.c - &t2:0
+  sizeof(t2.d):  8, &t2.d: 0019FF02, &t2.d - &t2:2
+  sizeof(t2.u):  1, &t2.u: 0019FF0A, &t2.u - &t2:10
+  sizeof(t2.s):  2, &t2.s: 0019FF0C, &t2.s - &t2:12
+  sizeof(struct Test4): 16
+  sizeof(t4  ): 16, &t4  : 0019FEF0, &t4   - &t4:0
+  sizeof(t4.c):  1, &t4.c: 0019FEF0, &t4.c - &t4:0
+  sizeof(t4.d):  8, &t4.d: 0019FEF4, &t4.d - &t4:4
+  sizeof(t4.u):  1, &t4.u: 0019FEFC, &t4.u - &t4:12
+  sizeof(t4.s):  2, &t4.s: 0019FEFE, &t4.s - &t4:14
+  ```
+
+  - *Visual Studio default pragma pack value* 로 검색하면. 
+  https://learn.microsoft.com/en-us/cpp/preprocessor/pack?view=msvc-170 에서
+
+    ```
+    the default value is 8 for x86, ARM, and ARM64. The default is 16 for x64 native and ARM64EC.
+    ```    
+  **구조체의 Size는 pack size의 배수이다. [ *sizeof(struct XXX) % pack size == 0* ]**
+
 ## 18-5. 구조체로 활용한 연결 리스트
   - linked list (직접 구현할 일 없음.. 그리고, 위험함.)
   - CPP의 STL을 사용하는 것이 바람직함.
