@@ -509,40 +509,39 @@ for (i = 0; i < length; ++i)
 ## 11-3. extern 키워드
 ## 11-4. static 키워드
 
-    register int  
-    volatile int  
-    auto int  
+  register int  
+  volatile int  
+  auto int  
 
-    const int, const char *  
+  const int, const char *  
 
-    > auto   : 블럭안 / 함수안 / 함수밖(전역) 변수  
-    > static : 함수안에서만 / 화일안에서만 상주하는 변수  
-    > extern : 화일밖에 변수  
+  > auto   : 블럭안 / 함수안 / 함수밖(전역) 변수  
+  > static : 함수안에서만 / 화일안에서만 상주하는 변수  
+  > extern : 화일밖에 변수  
 
-    ```c
-    if(A > 2) {
-        if(A < 10)
-            A++ ;
-    }
-    ```
-    ```c
-    if(A > 2 && A < 10) A++ ;
-    ```
-    ```c
-    if(2 < A && A < 10) A++ ;
-    ```
-
-    ```c
-    int isLitteEndian() {
-        union {
-            short si ;
-            char ch[2] ;
-        }
-        ch[0] = 0x01 ;
-        ch[1] = 0x00 ;
-        return (si == 1) ;
-    }
-    ```
+  ```c
+  if(A > 2) {
+      if(A < 10)
+          A++ ;
+  }
+  ```
+  ```c
+  if(A > 2 && A < 10) A++ ;
+  ```
+  ```c
+  if(2 < A && A < 10) A++ ;
+  ```
+  ```c
+  int isLitteEndian() {
+      union {
+          short si ;
+          char ch[2] ;
+      }
+      ch[0] = 0x01 ;
+      ch[1] = 0x00 ;
+      return (si == 1) ;
+  }
+  ```
 
 # 12. 배열과 문자열 (p:252)
 ## 12-1. 배열
@@ -554,25 +553,25 @@ for (i = 0; i < length; ++i)
 ## 13-2. 포인터
 ## 13-3. 포인터와 const 키워드
 ## 13-4. 포인터 변수의 주소 연산
-    ```c
-    {
-        char name[10] = "name" ;	// name의 type "char * const" 이다.
-        char *p = name ;
-        printf("p = %p, name = %p\n", p, name) ;
-        p = p + 3 ;
-        printf("p = %p, name = %p\n", p, name) ;
-        name = p + 3 ;  // Error
-        p = name + 3 ;  // OK
-    }
-    {
-        short name[10] = { 0, 1, 2, 3 } ;	// name의 type "short * const" 이다.
-        short *p = name ;
-        printf("p = %p, name = %p\n", p, name) ;
-        p = p + 3 ;
-        printf("p = %p, name = %p, &name[0] = %p\n", p, name, &name[0]) ;   // name == &name[0]
-        printf("p = %p, &name[3] = %p, (name+3) = %p\n", p, &name[3], name+3) ;
-    }
-    ```
+  ```c
+  {
+      char name[10] = "name" ;	// name의 type "char * const" 이다.
+      char *p = name ;
+      printf("p = %p, name = %p\n", p, name) ;
+      p = p + 3 ;
+      printf("p = %p, name = %p\n", p, name) ;
+      name = p + 3 ;  // Error
+      p = name + 3 ;  // OK
+  }
+  {
+      short name[10] = { 0, 1, 2, 3 } ;	// name의 type "short * const" 이다.
+      short *p = name ;
+      printf("p = %p, name = %p\n", p, name) ;
+      p = p + 3 ;
+      printf("p = %p, name = %p, &name[0] = %p\n", p, name, &name[0]) ;   // name == &name[0]
+      printf("p = %p, &name[3] = %p, (name+3) = %p\n", p, &name[3], name+3) ;
+  }
+  ```
 ## 13-5. 포인터와 대상의 크기
 ## 13-6. void *형 포인터
   - void* memset( void* dest, int ch, std::size_t count );
@@ -654,9 +653,11 @@ for (i = 0; i < length; ++i)
     	return 0 ;
     }
     ```
-    > (1,1)\
-    > (1,1)\
-    > (2,2)
+    ```
+    (1,1)
+    (1,1)
+    (2,2)
+    ```
 
     **여기서, 단 배열은 안 된다. (array is Pointer)**
     ```c
@@ -699,20 +700,159 @@ for (i = 0; i < length; ++i)
     }
     ```
     *msc*
-    >  p.name:004FFAA8 p ={name=004FFAA8[first], age=1, height=80}\
-    > p1.name:004FFA8C p1={name=004FFA8C[p1], age=0, height=0}\
-    > p1.name:004FFA8C p1={name=004FFA8C[first], age=1, height=80}\
-    >  p.name=004FF96C p ={name=004FF96C[first], age=1, height=80}\
-    >  r.name=004FF944 r ={name=004FF944[first2], age=1, height=80}\
-    > p1.name:004FFA8C p1={name=004FFA8C[first2], age=1, height=80}
-
+    ```
+     p.name:004FFAA8 p ={name=004FFAA8[first], age=1, height=80}
+    p1.name:004FFA8C p1={name=004FFA8C[p1], age=0, height=0}
+    p1.name:004FFA8C p1={name=004FFA8C[first], age=1, height=80}
+     p.name=004FF96C p ={name=004FF96C[first], age=1, height=80}
+     r.name=004FF944 r ={name=004FF944[first2], age=1, height=80}
+    p1.name:004FFA8C p1={name=004FFA8C[first2], age=1, height=80}
+    ```
     *gcc*
-    > ???
+    ```
+    zhang@rupang:~/tmp$ gcc struct.c
+    zhang@rupang:~/tmp$ ./a.out
+     p.name:0x7ffd7a1b50a0 p ={name=0x7ffd7a1b50a0[first], age=1, height=80}
+    p1.name:0x7ffd7a1b50c0 p1={name=0x7ffd7a1b50c0[p1], age=0, height=0}
+    p1.name:0x7ffd7a1b50c0 p1={name=0x7ffd7a1b50c0[first], age=1, height=80}
+     p.name=0x7ffd7a1b5050 p ={name=0x7ffd7a1b5050[first], age=1, height=80}
+     r.name=0x7ffd7a1b5020 r ={name=0x7ffd7a1b5020[first2], age=1, height=80}
+    p1.name:0x7ffd7a1b50c0 p1={name=0x7ffd7a1b50c0[first2], age=1, height=80}
+    ```
 
 ## 18-4. 구조체로 만든 자료형의 크기
   - #pragma pack(push)  
   - #pragma pack(1)  
   - #pragma pack(pop)  
+  ```c
+  #include <stdio.h>
+  
+  struct Test0 {
+  	char c;
+  	double d;
+  	unsigned char u;
+  	short s;
+  } ;
+  
+  #pragma pack(push)	// pack값 넣어두기
+  #pragma pack(1)
+  struct Test1 {
+  	char c;
+  	double d;
+  	unsigned char u;
+  	short s;
+  };
+  
+  #pragma pack(2)
+  struct Test2 {
+  	char c;
+  	double d;
+  	unsigned char u;
+  	short s;
+  };
+  
+  #pragma pack(4)
+  struct Test4 {
+  	char c;
+  	double d;
+  	unsigned char u;
+  	short s;
+  };
+  #pragma pack(pop)	// 넣어둔 pack값얻기
+  
+  int main() {
+  	struct Test0 t0 ;
+  	struct Test1 t1;
+  	struct Test2 t2;
+  	struct Test4 t4;
+  
+  	printf("sizeof(struct Test0): %zd\n", sizeof(struct Test0));
+  	printf("sizeof(t0  ): %2zd, &t0  : %p, &t0   - &t0:%td\n", sizeof(t0  ), &t0  ,   ((char*)&t0   - (char*)&t0));
+  	printf("sizeof(t0.c): %2zd, &t0.c: %p, &t0.c - &t0:%td\n", sizeof(t0.c), &t0.c,   ((char*)&t0.c - (char*)&t0));
+  	printf("sizeof(t0.d): %2zd, &t0.d: %p, &t0.d - &t0:%td\n", sizeof(t0.d), &t0.d,   ((char*)&t0.d - (char*)&t0));
+  	printf("sizeof(t0.u): %2zd, &t0.u: %p, &t0.u - &t0:%td\n", sizeof(t0.u), &t0.u,   ((char*)&t0.u - (char*)&t0));
+  	printf("sizeof(t0.s): %2zd, &t0.s: %p, &t0.s - &t0:%td\n", sizeof(t0.s), &t0.s,   ((char*)&t0.s - (char*)&t0));
+  
+  	printf("sizeof(struct Test1): %zd\n", sizeof(struct Test1));
+  	printf("sizeof(t1  ): %2zd, &t1  : %p, &t1   - &t1:%td\n", sizeof(t1  ), &t1  ,   ((char*)&t1   - (char*)&t1));
+  	printf("sizeof(t1.c): %2zd, &t1.c: %p, &t1.c - &t1:%td\n", sizeof(t1.c), &t1.c,   ((char*)&t1.c - (char*)&t1));
+  	printf("sizeof(t1.d): %2zd, &t1.d: %p, &t1.d - &t1:%td\n", sizeof(t1.d), &t1.d,   ((char*)&t1.d - (char*)&t1));
+  	printf("sizeof(t1.u): %2zd, &t1.u: %p, &t1.u - &t1:%td\n", sizeof(t1.u), &t1.u,   ((char*)&t1.u - (char*)&t1));
+  	printf("sizeof(t1.s): %2zd, &t1.s: %p, &t1.s - &t1:%td\n", sizeof(t1.s), &t1.s,   ((char*)&t1.s - (char*)&t1));
+  
+  	printf("sizeof(struct Test2): %zd\n", sizeof(struct Test2));
+  	printf("sizeof(t2  ): %2zd, &t2  : %p, &t2   - &t2:%td\n", sizeof(t2)  , &t2  ,   ((char*)&t2   - (char*)&t2));
+  	printf("sizeof(t2.c): %2zd, &t2.c: %p, &t2.c - &t2:%td\n", sizeof(t2.c), &t2.c,   ((char*)&t2.c - (char*)&t2));
+  	printf("sizeof(t2.d): %2zd, &t2.d: %p, &t2.d - &t2:%td\n", sizeof(t2.d), &t2.d,   ((char*)&t2.d - (char*)&t2));
+  	printf("sizeof(t2.u): %2zd, &t2.u: %p, &t2.u - &t2:%td\n", sizeof(t2.u), &t2.u,   ((char*)&t2.u - (char*)&t2));
+  	printf("sizeof(t2.s): %2zd, &t2.s: %p, &t2.s - &t2:%td\n", sizeof(t2.s), &t2.s,   ((char*)&t2.s - (char*)&t2));
+  
+  	printf("sizeof(struct Test4): %zd\n", sizeof(struct Test4));
+  	printf("sizeof(t4  ): %2zd, &t4  : %p, &t4   - &t4:%td\n", sizeof(t4)  , &t4  ,   ((char*)&t4   - (char*)&t4));
+  	printf("sizeof(t4.c): %2zd, &t4.c: %p, &t4.c - &t4:%td\n", sizeof(t4.c), &t4.c,   ((char*)&t4.c - (char*)&t4));
+  	printf("sizeof(t4.d): %2zd, &t4.d: %p, &t4.d - &t4:%td\n", sizeof(t4.d), &t4.d,   ((char*)&t4.d - (char*)&t4));
+  	printf("sizeof(t4.u): %2zd, &t4.u: %p, &t4.u - &t4:%td\n", sizeof(t4.u), &t4.u,   ((char*)&t4.u - (char*)&t4));
+  	printf("sizeof(t4.s): %2zd, &t4.s: %p, &t4.s - &t4:%td\n", sizeof(t4.s), &t4.s,   ((char*)&t4.s - (char*)&t4));
+  
+  	return 0 ;
+  }
+  ```
+
+  *VS2022 x64*
+  ```
+  sizeof(struct Test0): 24
+  sizeof(t0  ): 24, &t0  : 00000020D50FFC78, &t0   - &t0:0
+  sizeof(t0.c):  1, &t0.c: 00000020D50FFC78, &t0.c - &t0:0
+  sizeof(t0.d):  8, &t0.d: 00000020D50FFC80, &t0.d - &t0:8
+  sizeof(t0.u):  1, &t0.u: 00000020D50FFC88, &t0.u - &t0:16
+  sizeof(t0.s):  2, &t0.s: 00000020D50FFC8A, &t0.s - &t0:18
+  sizeof(struct Test1): 12
+  sizeof(t1  ): 12, &t1  : 00000020D50FFCA8, &t1   - &t1:0
+  sizeof(t1.c):  1, &t1.c: 00000020D50FFCA8, &t1.c - &t1:0
+  sizeof(t1.d):  8, &t1.d: 00000020D50FFCA9, &t1.d - &t1:1
+  sizeof(t1.u):  1, &t1.u: 00000020D50FFCB1, &t1.u - &t1:9
+  sizeof(t1.s):  2, &t1.s: 00000020D50FFCB2, &t1.s - &t1:10
+  sizeof(struct Test2): 14
+  sizeof(t2  ): 14, &t2  : 00000020D50FFCD8, &t2   - &t2:0
+  sizeof(t2.c):  1, &t2.c: 00000020D50FFCD8, &t2.c - &t2:0
+  sizeof(t2.d):  8, &t2.d: 00000020D50FFCDA, &t2.d - &t2:2
+  sizeof(t2.u):  1, &t2.u: 00000020D50FFCE2, &t2.u - &t2:10
+  sizeof(t2.s):  2, &t2.s: 00000020D50FFCE4, &t2.s - &t2:12
+  sizeof(struct Test4): 16
+  sizeof(t4  ): 16, &t4  : 00000020D50FFD08, &t4   - &t4:0
+  sizeof(t4.c):  1, &t4.c: 00000020D50FFD08, &t4.c - &t4:0
+  sizeof(t4.d):  8, &t4.d: 00000020D50FFD0C, &t4.d - &t4:4
+  sizeof(t4.u):  1, &t4.u: 00000020D50FFD14, &t4.u - &t4:12
+  sizeof(t4.s):  2, &t4.s: 00000020D50FFD16, &t4.s - &t4:14
+  ```
+
+  *VS2022 x86(Win32)*
+  ```
+  sizeof(struct Test0): 24
+  sizeof(t0  ): 24, &t0  : 00CFFDD4, &t0   - &t0:0
+  sizeof(t0.c):  1, &t0.c: 00CFFDD4, &t0.c - &t0:0
+  sizeof(t0.d):  8, &t0.d: 00CFFDDC, &t0.d - &t0:8
+  sizeof(t0.u):  1, &t0.u: 00CFFDE4, &t0.u - &t0:16
+  sizeof(t0.s):  2, &t0.s: 00CFFDE6, &t0.s - &t0:18
+  sizeof(struct Test1): 12
+  sizeof(t1  ): 12, &t1  : 00CFFDC0, &t1   - &t1:0
+  sizeof(t1.c):  1, &t1.c: 00CFFDC0, &t1.c - &t1:0
+  sizeof(t1.d):  8, &t1.d: 00CFFDC1, &t1.d - &t1:1
+  sizeof(t1.u):  1, &t1.u: 00CFFDC9, &t1.u - &t1:9
+  sizeof(t1.s):  2, &t1.s: 00CFFDCA, &t1.s - &t1:10
+  sizeof(struct Test2): 14
+  sizeof(t2  ): 14, &t2  : 00CFFDA8, &t2   - &t2:0
+  sizeof(t2.c):  1, &t2.c: 00CFFDA8, &t2.c - &t2:0
+  sizeof(t2.d):  8, &t2.d: 00CFFDAA, &t2.d - &t2:2
+  sizeof(t2.u):  1, &t2.u: 00CFFDB2, &t2.u - &t2:10
+  sizeof(t2.s):  2, &t2.s: 00CFFDB4, &t2.s - &t2:12
+  sizeof(struct Test4): 16
+  sizeof(t4  ): 16, &t4  : 00CFFD90, &t4   - &t4:0
+  sizeof(t4.c):  1, &t4.c: 00CFFD90, &t4.c - &t4:0
+  sizeof(t4.d):  8, &t4.d: 00CFFD94, &t4.d - &t4:4
+  sizeof(t4.u):  1, &t4.u: 00CFFD9C, &t4.u - &t4:12
+  sizeof(t4.s):  2, &t4.s: 00CFFD9E, &t4.s - &t4:14
+  ```
 ## 18-5. 구조체로 활용한 연결 리스트
   - linked list (직접 구현할 일 없음.. 그리고, 위험함.)
   - CPP의 STL을 사용하는 것이 바람직함.
