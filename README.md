@@ -4,6 +4,7 @@
 # 0. 차례
 > [1. 프로그램과 C 언어](#1-프로그램과-c-언어-p16)\
 > [2. C언어로 만드는 첫 번째 프로그램](#2-c언어로-만드는-첫-번째-프로그램-p32)\
+> [3. 자료형](#3-자료형-p46)\
 > [4. 상수와 변수](#4-상수와-변수-p65)\
 > [5. 함수](#5-함수-p84)\
 > [6. 표준 출력 함수](#6-표준-출력-함수-p105)\
@@ -67,6 +68,7 @@
   ```
 
 ## 1-5. C프로그램 실행 파일
+- .c(.cpp) --> .obj(.o) + .lib(.a) --> .exe
 
 # 2. C언어로 만드는 첫 번째 프로그램 (p:32)
 ## 2-1. C언어 개발 환경 구축하기
@@ -194,7 +196,7 @@
 
 - Call
   *Build하고 cmd창에서 아래와 같이 하자.* 
-  ```command
+  ```cmd
   > test.exe 1 param2 "파라 3"
   > test.exe 1 param2 "파라 3" > stdout.txt
   > type stdout.txt
@@ -211,7 +213,7 @@
   *nul* 은 nul로 보낸다. 즉, 버린다.
 
 - Return
-  ```command
+  ```cmd
   > test.exe 1 param2 "파라 3"
   > echo %errorlevel%
   ```
@@ -252,7 +254,6 @@
       return (i == 0) ? defaultValue : ret ;
   }
   ```
-
 
 # 6. 표준 출력 함수 (p:105)
 ## 6-1. 라이브러리
@@ -488,6 +489,14 @@ for (i = 0; i < length; ++i)
 ## 9-3. 반복문 구성 방법
 ## 9-4. 중첩 반복문
 ## 9-5. break와 continue 제어문
+  - continue ; // "이후 무시하고 다음"이라고 읽는다. [ 즉, 반복문안에서 전제조건으로 할용한다. ]
+  ```c
+  while(......) {
+      .....
+  // <--- continue의 이동위치
+  }
+  // <--- break의 이동위치
+  ```
 
 # 10. 시프트 연산자와 비트 연산자 (p:203)
 ## 10-1. 비트단위 연산과 비트 패턴
@@ -615,6 +624,91 @@ for (i = 0; i < length; ++i)
 ## 18-1. typedef 문법
 ## 18-2. 데이터를 구룹으로 묶는 구조체
 ## 18-3. 배열과 구조체
+  - struct에서 사용할 수 있는 유일한 연산자(= assignment operator)
+    ```c
+    #include <stdio.h>
+      
+    struct Point {
+    	int x, y ;
+    } ;
+    
+    void printPoint(struct Point pt)	{ printf("(%d,%d)\n", pt.x, pt.y) ;  }
+    
+    struct Point doublePoint(struct Point pt)
+    {
+    	struct Point ret = { pt.x * 2, pt.y * 2 } ;
+    	return ret ;
+    }
+    
+    int main(int argc, char *argv[])
+    {
+    	struct Point pt = { 1, 1 }, pt1 = { 0, 0 } ;
+    	printPoint(pt) ;
+    
+    	pt1 = pt ;        // assign[ memcpy(&pt1, &pt, sizeof(pt)) ; ]
+    	printPoint(pt1) ; // parameter passing도 assign [ memcpy(&pt, &pt1, sizeof(pt1)) ; ]
+    
+    	pt1 = doublePoint(pt) ; // return도 assign [ memcpy(&pt1, &ret, sizeof(ret)) ; ]
+    	printPoint(pt1) ;
+    
+    	return 0 ;
+    }
+    ```
+    > (1,1)\
+    > (1,1)\
+    > (2,2)
+
+    **여기서, 단 배열은 안 된다. (array is Pointer)**
+    ```c
+    #include <stdio.h>
+    #include <string.h>
+    
+    struct People {
+    	char name[14] ;
+    	unsigned char age ;
+    	int height ;
+    } ;
+    
+    void printPeople(struct People* p)
+    {
+    	printf("{name=%p[%s], age=%d, height=%d}\n", p->name, p->name, p->age, p->height) ;
+    }
+    
+    struct People increaseHeight(struct People p, int amount)
+    {
+    	struct People r = p ;
+    	printf(" p.name=%p ",  p.name) ;	printf("p =") ; printPeople(&p) ;
+    	strcat(r.name, "2") ;
+    	printf(" r.name=%p ",  r.name) ;	printf("r =") ; printPeople(&r) ;
+    	return r ;
+    }
+    
+    int main(int argc, char *argv[])
+    {
+    	struct People p = { "first", 1, 80 }, p1 = { "p1", 0, 0 } ;
+    	printf(" p.name:%p ",  p.name) ;	printf("p =") ;	printPeople(&p) ;	
+    	printf("p1.name:%p ", p1.name) ;	printf("p1=") ;	printPeople(&p1) ;	
+    
+    	p1 = p ;			// memcpy(&p1, &p, sizeof(struct People)) ;
+    	printf("p1.name:%p ", p1.name) ;	printf("p1=") ;	printPeople(&p1) ;
+    
+    	p1 = increaseHeight(p, +5) ;	// memcpy(&p1, &r, sizeof(struct People)) ;
+    	printf("p1.name:%p ", p1.name) ;	printf("p1=") ;	printPeople(&p1) ;
+    
+    	return 0 ;
+    }
+    ```
+    *msc*
+    >  p.name:004FFAA8 p ={name=004FFAA8[first], age=1, height=80}\
+    > p1.name:004FFA8C p1={name=004FFA8C[p1], age=0, height=0}\
+    > p1.name:004FFA8C p1={name=004FFA8C[first], age=1, height=80}\
+    >  p.name=004FF96C p ={name=004FF96C[first], age=1, height=80}\
+    >  r.name=004FF944 r ={name=004FF944[first2], age=1, height=80}\
+    > p1.name:004FFA8C p1={name=004FFA8C[first2], age=1, height=80}
+
+    *gcc*
+    > ???
+
 ## 18-4. 구조체로 만든 자료형의 크기
   - #pragma pack(push)  
   - #pragma pack(1)  
