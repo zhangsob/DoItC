@@ -136,7 +136,7 @@
   - <https://en.cppreference.com/w/c> 에서..C언어 Version을 확인할 수 있다.\
     ![C언어의 Spec](./image/c_spec.png)
 
-## 4-2. 데이터 저장 공간, 변수
+## 4-2. 데이터 저장 공간, 변수  
 ## 4-3. 2진수를 16진수로 변환하는 방법
 
 # 5. 함수 (p:84)
@@ -544,40 +544,140 @@ for (i = 0; i < length; ++i)
 ## 11-2. 프로그램 전체에서 사용할 수 있는 전역변수
 ## 11-3. extern 키워드
 ## 11-4. static 키워드
+## 11-A. 변수 선언 Scope 및 Memory 총정리
 
-  register int  
-  volatile int  
-  auto int  
-
-  const int, const char *  
-
-  > auto   : 블럭안 / 함수안 / 함수밖(전역) 변수  
-  > static : 함수안에서만 / 화일안에서만 상주하는 변수  
-  > extern : 화일밖에 변수  
+  |          | KeyWord  | Scope (유효범위)       |  Memory위치           |
+  |----------|----------|------------------------|-----------------------|
+  | 지역변수 | register | Block 안, 즉 { .... }  | register 또는 STACK   |
+  | 지역변수 | [auto]   | Block 안, 즉 { .... }  | STACK                 |
+  | 지역변수 | static   | Block 안               | DATA                  |
+  | 전역변수 |          | Function 밖            | DATA                  |
+  | 전역변수 | static   | Function 밖 && File 안 | DATA                  |
+  | 외부변수 | extern   | File 밖 (다른.obj)     | Link만 한다.          |
+  | literal  |          |                        | CODE                  |
+  
+  - const : assign 금지하기
+  - volatile : 최적화 금지하기 (Compiler에게 무의미하다고 삭제금지 알리기)
+  - register : 빈 register을 활용을 원하는 것이지, 반드시 register에 활용하는 것이 아니다.\
+    --> 최적화 과정에서 auto변수를 알아서 register을 활용함.(속도 Up) 그래서, 의미 없음
+  - HEAP은 alloc(malloc, calloc, realloc)함수에 의해 할당됨.\
+    free가 필요하여.. memory leak 발생할 수 있음(가급적 사용금지)\
+    대안, CPP의 STL을 활용하는 것이 바림직함.
+  - [auto], [signed], [int]는 생략가능하다.
 
   ```c
-  if(A > 2) {
-      if(A < 10)
-          A++ ;
+  #include <stdio.h>
+
+  //extern	i ;		// 기존 Library개발자가(.h화일 안 주고,) 전화로 알려주어 외부변수 Link 선언
+  #include "other.h"	// 새로 온 Library개발자가 준 것(함수까지 정리해 줌)
+
+  int	s = 0 ;
+
+  void func()
+  {
+    static	s = 10;
+    auto	i = 10 ;
+
+    {
+      static	s = 100 ;	// 함수지역변수 아니 임의 블럭지역변수는
+      auto	i = 100 ;	// CASE1 : 함수가 지나치게 길(큰)때 사용한다. (임시 담당자가)
+      printf("%-8s s : %3d (&s:%p), i : %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    }
+    {
+      static		s = 200 ;	// CASE2 : 변수명이 함수지역변수와 동일하나, 이 Block에서만 사용할 때.
+      register	i = 200 ;	//         (우리는 영어가 native가 아니므로, 작명에 어려움이 있다.)
+      //printf("%-8s s : %3d (&s:%p), i : %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;	// &i는 Error
+      printf("%-8s s : %3d (&s:%p), i : %3d\n", __FUNCTION__ "()", ++s, &s, ++i) ;
+    }
+    printf("%-8s s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+  }
+
+  void callfunc()
+  {
+    func() ;
+  }
+
+  int main()
+  {
+    func() ;
+    callfunc() ;	// func() ;를 대신 callfunc() ;하여 Stack깊이를 달리함.
+    printf("%-8s s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    other() ;
+    printf("%-8s s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    return 0 ;
   }
   ```
+  *main.c*
+
   ```c
-  if(A > 2 && A < 10) A++ ;
+  #ifndef _OTHER_H_
+  #define _OTHER_H_
+
+  extern int i ;	// 0 이면 운영, 1 이면 개발
+  void other() ;	// Test용도 함수
+
+  #endif	//#ifndef _OTHER_H_
   ```
+  *other.h*
+
   ```c
-  if(2 < A && A < 10) A++ ;
-  ```
-  ```c
-  int isLitteEndian() {
-      union {
-          short si ;
-          char ch[2] ;
-      }
-      ch[0] = 0x01 ;
-      ch[1] = 0x00 ;
-      return (si == 1) ;
+  #include <stdio.h>
+  #include "other.h"	// 새로운 개발자가 추가함.
+
+  static	s = 0 ;	// library개발자로 본 File내에서만 사용하고, main()개발자와 전역변수명 충돌방지
+  extern	i = 0 ;	// 설정같은 것을 main()개발자에게 노출하기 위함.[extern은 보통생략함.]
+
+  static void func()	// 함수명 충돌있다고 하여, static을 추가함. [함수도 static하면 본File에서만 유효함]
+  {
+    printf("%-8s s=> %3d (&s:%p), i=> %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+  }
+
+  extern void other()	// [extern은 보통생략함.]
+  {
+    printf("%-8s s=> %3d (&s:%p), i=> %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    func() ;	// 새로운 개발자가 함수추가함.
   }
   ```
+  *other.c*
+
+  ```
+  func()   s : 101 (&s:00A77004), i : 101 (&i:012FFD54)
+  func()   s : 201 (&s:00A77008), i : 201
+  func()   s =  11 (&s:00A77000), i =  11 (&i:012FFD60)
+  func()   s : 102 (&s:00A77004), i : 101 (&i:012FFC80)
+  func()   s : 202 (&s:00A77008), i : 201
+  func()   s =  12 (&s:00A77000), i =  11 (&i:012FFC8C)
+  main()   s =   1 (&s:00A7715C), i =   1 (&i:00A77154)
+  other()  s=>   1 (&s:00A77150), i=>   2 (&i:00A77154)
+  func()   s=>   2 (&s:00A77150), i=>   3 (&i:00A77154)
+  main()   s =   2 (&s:00A7715C), i =   4 (&i:00A77154)
+  ```
+  *실행결과* : 변수 값 및 변수의 주소값을 살펴보세요.
+
+  - 예약어(reserved keyword) : <https://en.cppreference.com/w/c/keyword>
+    - C언어 쉽다고 하는 것은 예약어 갯수(C99이전:32) 적어서
+    - C언어 어렵다고 하는 것은 표준Library가 적어서
+
+## 11-B. const와 함수선언문 읽기.
+  - string.h화일에 strcpy함수가 아래와 같다고 한다.
+    ```c
+    char *strcpy( char *dest, const char *src );
+    ```
+    C언의 문자열은 Null Terminated String으로 pointer로 주고 받는다.
+    - 파라미터 char *dest는 함수내부에서 값이 변경될 수도 있다.\
+      --> *출력/입력/입출력* 알 수가 없다. (소스코드을 읽거나, 함수 설명서가 필요하다.)
+    - 파라미터 const char *src는 함수내부에서 변경되지 않는다.\
+      --> 즉, *입력전용* 이라는 뜻이다.\
+      --> pointer 파라미터에서 const를 넣어 주어야 입력전용임을 명확히 할 수 있다.
+
+  - 아래의 함수도 읽어보자.
+    ```c
+    int strcmp( const char* lhs, const char* rhs );
+    size_t strlen( const char* str );
+    char* strchr( const char* str, int ch );
+    int memcmp( const void* lhs, const void* rhs, size_t count );
+    ```
+    <https://en.cppreference.com/w/c/string/byte> 에서
 
 # 12. 배열과 문자열 (p:252)
 ## 12-1. 배열
@@ -981,3 +1081,16 @@ for (i = 0; i < length; ++i)
   - Java : JNI
   - Node : napi
   - Browser : webasm
+
+# C. LittleEndian, BigEndian
+  ```c
+  int isLittleEndian() {
+      union {
+          short si ;
+          char ch[2] ;
+      }
+      ch[0] = 0x01 ;
+      ch[1] = 0x00 ;
+      return (si == 1) ;
+  }
+  ```
