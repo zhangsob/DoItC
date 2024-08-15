@@ -581,15 +581,15 @@ for (i = 0; i < length; ++i)
     {
       static	s = 100 ;	// 함수지역변수 아니 임의 블럭지역변수는
       auto	i = 100 ;	// CASE1 : 함수가 지나치게 길(큰)때 사용한다. (임시 담당자가)
-      printf("%-8s s : %3d (&s:%p), i : %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+      printf("%-8s:%p, s : %3d (&s:%p), i : %3d (&i:%p)\n", __FUNCTION__ "()", func, ++s, &s, ++i, &i) ;
     }
     {
       static		s = 200 ;	// CASE2 : 변수명이 함수지역변수와 동일하나, 이 Block에서만 사용할 때.
       register	i = 200 ;	//         (우리는 영어가 native가 아니므로, 작명에 어려움이 있다.)
       //printf("%-8s s : %3d (&s:%p), i : %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;	// &i는 Error
-      printf("%-8s s : %3d (&s:%p), i : %3d\n", __FUNCTION__ "()", ++s, &s, ++i) ;
+      printf("%-8s:%p, s : %3d (&s:%p), i : %3d\n", __FUNCTION__ "()", func, ++s, &s, ++i) ;
     }
-    printf("%-8s s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    printf("%-8s:%p, s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", func, ++s, &s, ++i, &i) ;
   }
 
   void callfunc()
@@ -601,9 +601,9 @@ for (i = 0; i < length; ++i)
   {
     func() ;
     callfunc() ;	// func() ;를 대신 callfunc() ;하여 Stack깊이를 달리함.
-    printf("%-8s s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
-    other() ;
-    printf("%-8s s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    printf("%-8s:%p, s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", main, ++s, &s, ++i, &i) ;
+    other(stderr) ;
+    printf("%-8s:%p, s = %3d (&s:%p), i = %3d (&i:%p)\n", __FUNCTION__ "()", main, ++s, &s, ++i, &i) ;
     return 0 ;
   }
   ```
@@ -614,7 +614,8 @@ for (i = 0; i < length; ++i)
   #define _OTHER_H_
 
   extern int i ;	// 0 이면 운영, 1 이면 개발
-  void other() ;	// Test용도 함수
+  //int func(FILE *fp) ;	// 출동로 인해, 여기는 주석처리하고,  .c에서 static처리함
+  void other() ;	// Test용도 함수, 
 
   #endif	//#ifndef _OTHER_H_
   ```
@@ -627,32 +628,33 @@ for (i = 0; i < length; ++i)
   static	s = 0 ;	// library개발자로 본 File내에서만 사용하고, main()개발자와 전역변수명 충돌방지
   extern	i = 0 ;	// 설정같은 것을 main()개발자에게 노출하기 위함.[extern은 보통생략함.]
 
-  static void func()	// 함수명 충돌있다고 하여, static을 추가함. [함수도 static하면 본File에서만 유효함]
+  static func(FILE *fp)	// 함수명 충돌있다고 하여, static을 추가함. [함수도 static하면 본File에서만 유효함]
   {
-    printf("%-8s s=> %3d (&s:%p), i=> %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
+    if(fp)	fprintf(fp, "%-8s:%p, s=> %3d (&s:%p), i=> %3d (&i:%p)\n", __FUNCTION__ "()", func, ++s, &s, ++i, &i) ;
   }
 
-  extern void other()	// [extern은 보통생략함.]
+  extern void other() // [extern은 보통생략함.]
   {
-    printf("%-8s s=> %3d (&s:%p), i=> %3d (&i:%p)\n", __FUNCTION__ "()", ++s, &s, ++i, &i) ;
-    func() ;	// 새로운 개발자가 함수추가함.
+    int i = func(stdout) ;
+    printf("%-8s:%p, s=> %3d (&s:%p), i=> %3d (&i:%p)\n", __FUNCTION__ "()", other, ++s, &s, ++i, &i) ;
   }
   ```
   *other.c*
 
   ```
-  func()   s : 101 (&s:00A77004), i : 101 (&i:012FFD54)
-  func()   s : 201 (&s:00A77008), i : 201
-  func()   s =  11 (&s:00A77000), i =  11 (&i:012FFD60)
-  func()   s : 102 (&s:00A77004), i : 101 (&i:012FFC80)
-  func()   s : 202 (&s:00A77008), i : 201
-  func()   s =  12 (&s:00A77000), i =  11 (&i:012FFC8C)
-  main()   s =   1 (&s:00A7715C), i =   1 (&i:00A77154)
-  other()  s=>   1 (&s:00A77150), i=>   2 (&i:00A77154)
-  func()   s=>   2 (&s:00A77150), i=>   3 (&i:00A77154)
-  main()   s =   2 (&s:00A7715C), i =   4 (&i:00A77154)
+  func()  :00D011C7, s : 101 (&s:00D07004), i : 101 (&i:007CFBEC)
+  func()  :00D011C7, s : 201 (&s:00D07008), i : 201
+  func()  :00D011C7, s =  11 (&s:00D07000), i =  11 (&i:007CFBF8)
+  func()  :00D011C7, s : 102 (&s:00D07004), i : 101 (&i:007CFB18)
+  func()  :00D011C7, s : 202 (&s:00D07008), i : 201
+  func()  :00D011C7, s =  12 (&s:00D07000), i =  11 (&i:007CFB24)
+  main()  :00D0114A, s =   1 (&s:00D0715C), i =   1 (&i:00D07154)
+  func()  :00D014E0, s=>   1 (&s:00D07150), i=>   2 (&i:00D07154)
+  other() :00D0108C, s=>   2 (&s:00D07150), i=>  65 (&i:007CFBF4)
+  main()  :00D0114A, s =   2 (&s:00D0715C), i =   3 (&i:00D07154)
   ```
   *실행결과* : 변수 값 및 변수의 주소값을 살펴보세요.
+  *13.장 포인터* / *16.장 메모리할당* / *20.장 함수포인터* 를 미리 살펴 보았다.
 
   - 예약어(reserved keyword) : <https://en.cppreference.com/w/c/keyword>
     - C언어 쉽다고 하는 것은 예약어 갯수(C99이전:32) 적어서
