@@ -569,7 +569,7 @@ for (i = 0; i < length; ++i)
   #include <stdio.h>
 
   //extern	i ;		// 기존 Library개발자가(.h화일 안 주고,) 전화로 알려주어 외부변수 Link 선언
-  #include "other.h"	// 새로 온 Library개발자가 준 것(함수까지 정리해 줌)
+  #include "other.h"	// 새로 온 Library개발자가 준 것(함수까지 정리해 줌), .c는 .h없어도 된다.
 
   int	s = 0 ;
 
@@ -659,6 +659,8 @@ for (i = 0; i < length; ++i)
   - 예약어(reserved keyword) : <https://en.cppreference.com/w/c/keyword>
     - C언어 쉽다고 하는 것은 예약어 갯수(C99이전:32) 적어서
     - C언어 어렵다고 하는 것은 표준Library가 적어서
+    - 이 책에서 다루지 않는 register, volatile, inline, restrict에 대하여 찾아보자!\
+      (4가지 모두 최적화와 관련이 있다.)
 
 ## 11-B. const와 함수선언문 읽기.
   - string.h화일에 strcpy함수가 아래와 같다고 한다.
@@ -1096,3 +1098,51 @@ for (i = 0; i < length; ++i)
       return (si == 1) ;
   }
   ```
+# D. 용어
+  - 값 [ L-Value / R-Value ]
+    - L-Value = R-Value : *assign의 왼쪽값, 오른족값*
+    - L-Value : 변수 ( 넣을 수 있는 공간[Memory Address가 있는])
+    - R-Value : 값 [ 결과가 register에 있는 ] 
+      - Literal : CODE영역에 있는 상수값을 Load하여 register에
+      - 변수 : Memory있는 값을 Load하여 register에 
+      - Expression : R-Value 와 Operator의 결과 값(register에)
+      - 함수의 결과값 : ... return 값(register에)
+  - 식(Expression) : 연산자(Operator)가 있는 것
+  - 문(Statement) [ 선언문 / 구현문 ]
+    - 선언문 : *최초로 작명해야 하는 문장*
+      - union, enum, struct 선언문
+      - typedef문
+      - 변수 선언문  
+      - 함수 선언문(Prototype)
+      
+    - 구현문
+      - Literal, Expression, Function Call, { } 있는 문장
+
+# E. .h화일 작성하는 방법
+  - .h의 요소
+    > #define문\
+    > typedef문\
+    > enum 선언문\
+    > struct 선언문\
+    > union 선언문\
+    > extern 변수 선언문(= Literal이 없는 순수 선언문)\
+    > extern 함수 선언문\
+    > inline 함수 구현문
+
+    *상기순서대로 작성한다.*\
+    ■ document comment를 넣어야 향후, 유지보수가 쉬어진다.
+      - Library설명서를 별도로 있으면 분실한다.
+      - 소스코드 처럼 유지보수 대상이다.
+
+  - 모든 .c에 대하여 쌍(pair)이 되는 .h를 작성한다.
+    - 그래야, 추후 cpp로 전환이 쉬어진다.
+    - .cpp는 .h가 필수이다. (.c는 .h가 Option이다.)
+      - function overroad기능으로 인해 parameter type check를 한다.
+      - unsigned / signed형는 완전히 .cpp에서 다른 형이다.
+      - 숫자는 (signed) int형, 문자열은 (signed) char *형이 기본이다.
+      - char *보다 const char *가 더 범용적인 type이다.
+
+# F. include 순서 알아보기
+
+# G. c언어애서 cpp라이브러리 사용하기
+  - link name
