@@ -1065,7 +1065,16 @@ for (i = 0; i < length; ++i)
 # 19. 파일 입출력 (p:497)
 ## 19-1. 표준 입출력 라이브러리
 ## 19-2. Text File과 Binary File
-  - Magic Number
+  - Text와 Binary 구분하는 방법\
+    0x00 ~ 0x08, 0x0E ~ 0x1F가 있으면 99.9% Binary\
+    0x09 : TAB, 0x0A : Line Feed, 0x0B : Vertical TAB, 0x0C : Form Feed, 0x0D : Carriage Return
+  - Magic Number\
+    *File Format Specification에서 올바른(원하는) 화일인지 빠른 구분을 하기 값*
+    > 화일이 첫 부분이 "GIF89a" 또는 "GIF87a"로 시작하면 GIF로 해석을 시도한다.\
+    > FF D8로 시작하여 FF D9로 끝난다... JPEG화일로 해석을 시도한다.\
+    > "%PDF"로 시작한다... PNG화일로 해석한다.\
+    > EF BB BF로 시작한다.. UTF8화일이다.\
+    > 50 4B 03 04로 시작한다.. ZIP화일로 해석한다.
 
 ## 19-3. 파열 열기와 닫기
 ## 19-4. Text 파일에 데이터 읽고 쓰기
@@ -1137,7 +1146,7 @@ for (i = 0; i < length; ++i)
   - 모든 .c에 대하여 쌍(pair)이 되는 .h를 작성한다.
     - 그래야, 추후 cpp로 전환이 쉬어진다.
     - .cpp는 .h가 필수이다. (.c는 .h가 Option이다.)
-      - function overroad기능으로 인해 parameter type check를 한다.
+      - function overload기능으로 인해 parameter type check를 한다.
       - unsigned / signed형는 완전히 .cpp에서 다른 형이다.
       - 숫자는 (signed) int형, 문자열은 (signed) char *형이 기본이다.
       - char *보다 const char *가 더 범용적인 type이다.
@@ -1146,3 +1155,40 @@ for (i = 0; i < length; ++i)
 
 # G. c언어애서 cpp라이브러리 사용하기
   - link name
+  - dumpbin
+  
+    아래의 sum.c를 Compile하여
+    ```c
+    int sum(int a, int b)
+    {
+      return a + b ;
+    }
+    ```
+    dumpbin하기
+    ```cmd
+    > dumpbin.exe /?
+    > dumpbin sum.obj /SYMBOLS | find "sum" | find "External"
+    019 00000000 SECT6  notype ()    External     | sum
+    ```
+    확장자를 .cpp를 변경하고 Compile후 dumbin하기
+    ```cmd
+    > dumpbin sum.obj /SYMBOLS | find "sum" | find "External"
+    019 00000000 SECT4  notype ()    External     | ?sum@@YAHHH@Z (int __cdecl sum(int,int))
+    ```
+    *?sum@@YAHHH@Z*를 보면.. "sum"에 꼬리가 있다.. return 및 paramter type이 보인다.\
+    cpp는 function overload 때문에 구별하는 군.
+
+    static int sum(int a, int b)로 static으로 변경한다.
+    ```cmd
+    > dumpbin sum.obj /SYMBOLS | find "sum" | find "Static"
+    00C 00000000 SECT3  notype       Static       | __32BB8077_sum@cpp
+    ```
+    다시 .cpp에서 .c로 변경하였다.
+    ```cmd
+    > dumpbin sum.obj /SYMBOLS | find "sum" | find "Static"
+    00C 00000000 SECT3  notype       Static       | __EAF8856D_sum@c
+    ```
+    - .dll인 경우 /EXPORTS로 알아보면.. Export한 dll함수를 얻을 수 있다.
+  - cl.exe : compiler
+  - link.exe : linker 연결해 주기[.exe(.dll) 만들기]
+  - lib.exe : .obj를 모아주어 .lib를 만들기에서 .obj를 분리하기
